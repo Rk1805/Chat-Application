@@ -216,6 +216,9 @@ void show_con_list(GtkWidget* widget,gpointer* data)
     {
         system("mkdir Contacts");
         rc = sqlite3_open("./Contacts/Contacts.db",&db);
+        char* query = "Create Table Contacts(\"CON_NAME TEXT NOT NULL PRIMARY KEY\",\"IP_ADDRESS TEXT NOT NULL\")";
+        sqlite3_exec(db,query,NULL,NULL,NULL);
+
     }
     else
     {
