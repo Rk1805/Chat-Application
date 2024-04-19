@@ -11,6 +11,10 @@ void create_add_user_window(GtkWidget *widget, gpointer data);
 void user_added(GtkWidget* widget,gpointer* data);
 void quit__area(GtkWidget* widget,gpointer* data);
 void show_con_list(GtkWidget* widget,gpointer* data);
+void* gtk__init__()
+{
+    gtk_main();
+}
 int main(int argc, char *argv[])
 {
     // Initialize GTK
@@ -49,12 +53,21 @@ int main(int argc, char *argv[])
     // Show all widgets
     gtk_widget_show_all(window);
 
-    // Main GTK loop
-    gtk_main();
 
+    // Creating multiple threads in order to run the server loop and the Gtk_Main Loop simultaneously.
+    pthread_t server_thread, gtk_thread;
+    int* connfd;
+    pthread_create(&gtk_thread,NULL,gtk__init__,NULL);
+    pthread_create(&server_thread,NULL,begin_server,connfd);
+
+    pthread_join(server_thread,NULL);
+	pthread_join(gtk_thread,NULL);
+    if(connfd != 0)
+    {
+        on_chat_clicked(button_chat,window);
+    }
     return 0;
 }
-
 
 /* *Distinction between the main function and the other UI window methods.*/
 
@@ -82,13 +95,19 @@ void on_chat_clicked(GtkWidget *widget, gpointer data) {
 
 
 
+    // Create message entry
+    GtkWidget *message_entry = gtk_entry_new();
+    gtk_entry_set_placeholder_text(GTK_ENTRY(message_entry), "Type your message...");
     // Creating the status bar
     GtkWidget* st_label = gtk_label_new("Not Connected");
-    // gtk_label_set_label(GTK_LABEL(st_label),"");
+    //Initialising text box
+    GtkWidget* text_box = gtk_text_view_new();
 
-    GtkWidget** dabba = (GtkWidget**)malloc(sizeof(GtkWidget*)*2);
+    GtkWidget** dabba = (GtkWidget**)malloc(sizeof(GtkWidget*)*4);
     dabba[0] = receiver_entry;
     dabba[1] = st_label;
+    dabba[2] = message_entry;
+    dabba[3] = text_box;
     // Creating the contact List Button:
     GtkWidget** dabba2 = (GtkWidget**)malloc(sizeof(GtkWidget*)*2);
     dabba2[0] = chat_window;
@@ -108,16 +127,12 @@ void on_chat_clicked(GtkWidget *widget, gpointer data) {
     GtkWidget *scrolled_window = gtk_scrolled_window_new(NULL, NULL);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window),GTK_POLICY_AUTOMATIC,GTK_POLICY_AUTOMATIC);
     gtk_container_add(GTK_CONTAINER(chat_box), scrolled_window);
-    GtkWidget* text_box = gtk_text_view_new();
     gtk_widget_set_size_request(scrolled_window, 1, 150);
 
     // Created the text_box to display chats.
     gtk_text_view_set_editable(GTK_TEXT_VIEW(text_box), FALSE);
     gtk_container_add(GTK_CONTAINER(scrolled_window), text_box);
     
-    // Create message entry
-    GtkWidget *message_entry = gtk_entry_new();
-    gtk_entry_set_placeholder_text(GTK_ENTRY(message_entry), "Type your message...");
     gtk_box_pack_start(GTK_BOX(chat_box), message_entry, FALSE, FALSE, 1);
 
     // Create the packer in order to pass multiple gtkWidgets into the callback function
@@ -143,6 +158,7 @@ void on_chat_clicked(GtkWidget *widget, gpointer data) {
     gtk_widget_show_all(chat_window);
     gtk_widget_hide(main_window);
 }
+
 
 void show_con_list(GtkWidget* widget,gpointer* data)
 {
@@ -274,6 +290,10 @@ void on_done_clicked(GtkWidget *widget, gpointer* data)
     gtk_text_buffer_get_end_iter(buffer,&iter);
     gtk_text_buffer_insert(buffer,&iter,"\n",-1);
     gtk_entry_set_text((GtkEntry*)message_inp,"");
+    struct packer* dummy_pack;
+    dummy_pack->data = data;
+    dummy_pack->sockf = NULL;
+    send_m(dummy_pack);
 }   
 
 // Establishing connection with the user
@@ -310,6 +330,7 @@ void connect_to_ip(GtkWidget* widget,gpointer* data)
         if(strcmp(rec_name,(char*)sqlite3_column_text(stmt,0)) == 0)
         {
             printf("%s\n",(char*)sqlite3_column_text(stmt,1));
+            connect_ip((char*)sqlite3_column_text(stmt,1),data);
         }
     }
 }

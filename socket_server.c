@@ -8,12 +8,12 @@
 #include<pthread.h>
 #include<arpa/inet.h>
 #include <unistd.h> // read(), write(), close()
-
+#include "socket_server.h"
 #define MAXLEN 100 
 #define PORT 8080 
 #define SA struct sockaddr 
 
-void* send_m(void *ptr)
+void* send_m_server(void *ptr,gpointer* data)
 {
 	int sockfd=*((int*)ptr);
 	char buff[MAXLEN];
@@ -34,7 +34,7 @@ void* send_m(void *ptr)
 	return NULL;
 }
 
-void* recieve_m(void *ptr)
+void* recieve_m_server(void *ptr,gpointer* data)
 {
 	int sockfd=*((int*)ptr);
 	char buff[MAXLEN];
@@ -54,10 +54,10 @@ void* recieve_m(void *ptr)
 }
 
 // Driver function 
-int begin_server()
+void* begin_server(int* connfd)
 { 
 	pthread_t send_thread, recieve_thread;
-	int sockfd, connfd; 
+	int sockfd; 
 	struct sockaddr_in servaddr, cli; 
 
 	// socket create and verification 
@@ -94,8 +94,8 @@ int begin_server()
 	len = sizeof(cli); 
 
 	// Accept the data packet from client and verification 
-	connfd = accept(sockfd, (SA*)&cli, &len); 
-	if (connfd < 0) { 
+	*connfd = accept(sockfd, (SA*)&cli, &len); 
+	if (*connfd < 0) { 
 		printf("server accept failed...\n"); 
 		exit(0); 
 	} 
@@ -108,8 +108,8 @@ int begin_server()
 		printf("Connected with the client\n");
 	}
 		
-	pthread_create(&send_thread,NULL,send_m,&connfd);
-	pthread_create(&recieve_thread,NULL,recieve_m,&connfd);
+	pthread_create(&send_thread,NULL,send_m_server,&connfd);
+	pthread_create(&recieve_thread,NULL,recieve_m_server,&connfd);
 
 	pthread_join(send_thread,NULL);
 	pthread_join(recieve_thread,NULL);

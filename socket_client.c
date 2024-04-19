@@ -1,14 +1,16 @@
 #include "socket_client.h"
-void* send_m(void *ptr)
+
+int sockfd;
+void* send_m(struct packer* pack)
 {
-	int sockfd=*((int*)ptr);
+	// int sockfd=*((int*)(pack->sockf));
 	char buff[MAXLEN];
 	int n;
-	for (;;) {
+	for (;;)
+	{
 		bzero(buff, sizeof(buff));
 		n = 0;
-		while ((buff[n++] = getchar()) != '\n')
-			;
+		while ((buff[n++] = getchar()) != '\n');
 		write(sockfd, buff, sizeof(buff));
 		if ((strncmp(buff, "exit", 4)) == 0) 
 		{
@@ -21,14 +23,29 @@ void* send_m(void *ptr)
 	return NULL;
 }
 
-void* recieve_m(void *ptr)
+void* recieve_m(struct packer* pack)
 {
-	int sockfd=*((int*)ptr);
+	int sockfd=*((int*)(pack->sockf));
 	char buff[MAXLEN];
 	int n;
+	GtkWidget* rec_name_panel = GTK_WIDGET((pack->data)[0]);
+    const gchar* rec_name = gtk_entry_get_text((GtkEntry*)rec_name_panel);
 	for (;;) {
 		bzero(buff, sizeof(buff));
 		read(sockfd, buff, sizeof(buff));
+		GtkWidget *message_inp = GTK_WIDGET((pack->data)[2]);
+    	GtkWidget *text_box = GTK_WIDGET((pack->data)[3]);
+		GtkTextIter iter;
+    	GtkTextBuffer* buffer;
+    	buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text_box));
+    	gtk_text_buffer_get_end_iter(buffer,&iter);
+		gtk_text_buffer_insert(buffer,&iter,rec_name,-1);
+    	gtk_text_buffer_get_end_iter(buffer,&iter);
+		gtk_text_buffer_insert(buffer,&iter,": ",-1);
+    	gtk_text_buffer_get_end_iter(buffer,&iter);
+		gtk_text_buffer_insert(buffer,&iter,buff,-1);
+    	gtk_text_buffer_get_end_iter(buffer,&iter);
+		gtk_text_buffer_insert(buffer,&iter,"\n",-1);
 		printf("Server : %s", buff);
 		if ((strncmp(buff, "exit", 4)) == 0) {
 			printf(" Exit...\n");
@@ -38,10 +55,11 @@ void* recieve_m(void *ptr)
 	return NULL; 
 }
 
-void connect_ip(char* ip)
+
+void connect_ip(char* ip,gpointer* data)
 {
 	pthread_t send_thread, recieve_thread;
-	int sockfd, connfd;
+	int connfd;
 	struct sockaddr_in servaddr, cli;
 
 	// socket create and verification
@@ -69,15 +87,21 @@ void connect_ip(char* ip)
 		exit(0);
 	}
 	else
-	{	
-		printf("connected to the server..\n");
+	{
+		GtkWidget* label = GTK_WIDGET(data[1]);
+		gtk_label_set_label(GTK_LABEL(label),"Connected");
+		printf("Connected to the server..\n");
 	}
-	pthread_create(&send_thread,NULL,send_m,&sockfd);
-	pthread_create(&recieve_thread,NULL,recieve_m,&sockfd);
+	struct packer* pack1;
+	pack1->sockf = &sockfd;
+	pack1->data = data;
 
+	pthread_create(&send_thread,NULL,send_m,pack1);
+	pthread_create(&recieve_thread,NULL,recieve_m,pack1);
+
+	
 	pthread_join(send_thread,NULL);
 	pthread_join(recieve_thread,NULL);
-
 
 	// close the socket
 	close(sockfd);

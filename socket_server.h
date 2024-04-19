@@ -1,6 +1,7 @@
 #ifndef SOCKET_SERVER
 #define SOCKET_SERVER
 
+#include<gtk/gtk.h>
 #include <stdio.h> 
 #include <netdb.h> 
 #include <netinet/in.h> 
@@ -17,8 +18,8 @@
 #define SA struct sockaddr
 
 
-void* send_m(void *ptr);
-void* recieve_m(void *ptr);
-int begin_server();
+void* send_m_server(void *ptr,gpointer* data);
+void* recieve_m_server(void *ptr,gpointer* data);
+void* begin_server();
 
 #endif

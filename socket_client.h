@@ -10,12 +10,20 @@
 #include <sys/socket.h>
 #include <unistd.h> // read(), write(), close()
 #include<pthread.h>
+#include<gtk/gtk.h>
 
 #define MAXLEN 100
 #define PORT 8080
 #define SA struct sockaddr
 
-void connect_ip(char* ip);
-void* send_m(void *ptr);
-void* recieve_m(void *ptr);
+struct packer
+{
+	void* sockf;
+	gpointer* data;
+};
+void connect_ip(char* ip,gpointer* data);
+void* send_m(struct packer* pack);
+void* recieve_m(struct packer* pack);
+
+
 #endif
