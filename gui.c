@@ -284,16 +284,18 @@ void on_done_clicked(GtkWidget *widget, gpointer* data)
     const gchar* message = gtk_entry_get_text((GtkEntry*)message_inp);
     GtkTextIter iter;
     GtkTextBuffer* buffer;
+    struct packer* dummy_pack;
+    dummy_pack->data = data;
+    dummy_pack->sockf = NULL;
+    send_m_server(dummy_pack);
     buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text_box));
+    gtk_text_buffer_get_end_iter(buffer,&iter);
+    gtk_text_buffer_insert(buffer,&iter,"You: ",-1);
     gtk_text_buffer_get_end_iter(buffer,&iter);
     gtk_text_buffer_insert(buffer,&iter,message,-1);
     gtk_text_buffer_get_end_iter(buffer,&iter);
     gtk_text_buffer_insert(buffer,&iter,"\n",-1);
     gtk_entry_set_text((GtkEntry*)message_inp,"");
-    struct packer* dummy_pack;
-    dummy_pack->data = data;
-    dummy_pack->sockf = NULL;
-    send_m(dummy_pack);
 }   
 
 // Establishing connection with the user
