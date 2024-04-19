@@ -76,7 +76,7 @@ int main()
 
 	// Binding newly created socket to given IP and verification 
 	if ((bind(sockfd, (SA*)&servaddr, sizeof(servaddr))) != 0) { 
-		printf("socket bind failed...\n"); 
+		printf("Socket bind failed...\n"); 
 		exit(0); 
 	} 
 	else
