@@ -6,6 +6,7 @@
 #include <sys/socket.h> 
 #include <sys/types.h>
 #include<pthread.h>
+#include<arpa/inet.h>
 #include <unistd.h> // read(), write(), close()
 
 #define MAX 100 
@@ -98,8 +99,14 @@ int main()
 		printf("server accept failed...\n"); 
 		exit(0); 
 	} 
-	else
-		printf("server accept the client...\n"); 
+	else 
+	{
+		// Retrieve client's IP address
+		char client_ip[25];
+		struct sockaddr_in* client_addr = (struct sockaddr_in*)&cli;
+		inet_ntop(AF_INET, &(client_addr->sin_addr), client_ip, INET_ADDRSTRLEN);
+		printf("Connected with the client\n");
+	}
 		
 	pthread_create(&send_thread,NULL,send_m,&connfd);
 	pthread_create(&recieve_thread,NULL,recieve_m,&connfd);
