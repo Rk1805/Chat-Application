@@ -11,7 +11,7 @@
 #include <unistd.h> // read(), write(), close()
 #include<pthread.h>
 
-#define MAX 100
+#define MAXLEN 100
 #define PORT 8080
 #define SA struct sockaddr
 

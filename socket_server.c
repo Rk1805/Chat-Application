@@ -9,14 +9,14 @@
 #include<arpa/inet.h>
 #include <unistd.h> // read(), write(), close()
 
-#define MAX 100 
+#define MAXLEN 100 
 #define PORT 8080 
 #define SA struct sockaddr 
 
 void* send_m(void *ptr)
 {
 	int sockfd=*((int*)ptr);
-	char buff[MAX];
+	char buff[MAXLEN];
 	int n;
 	for (;;) {
 		bzero(buff, sizeof(buff));
@@ -37,7 +37,7 @@ void* send_m(void *ptr)
 void* recieve_m(void *ptr)
 {
 	int sockfd=*((int*)ptr);
-	char buff[MAX];
+	char buff[MAXLEN];
 	int n;
 	for (;;) 
 	{
@@ -54,7 +54,7 @@ void* recieve_m(void *ptr)
 }
 
 // Driver function 
-int main() 
+int begin_server()
 { 
 	pthread_t send_thread, recieve_thread;
 	int sockfd, connfd; 

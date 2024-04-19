@@ -1,6 +1,8 @@
 #include<stdio.h>
 #include<sqlite3.h>
 #include<gtk/gtk.h>
+#include "socket_client.h"
+#include "socket_server.h"
 // Function declarations
 void on_chat_clicked(GtkWidget *widget, gpointer data);
 void on_done_clicked(GtkWidget *widget, gpointer* data);
