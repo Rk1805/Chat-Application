@@ -1,17 +1,4 @@
-#include <arpa/inet.h> // inet_addr()
-#include <netdb.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <strings.h> // bzero()
-#include <sys/socket.h>
-#include <unistd.h> // read(), write(), close()
-#include<pthread.h>
-
-#define MAX 100
-#define PORT 8080
-#define SA struct sockaddr
-
+#include "socket_client.h"
 void* send_m(void *ptr)
 {
 	int sockfd=*((int*)ptr);
@@ -51,7 +38,7 @@ void* recieve_m(void *ptr)
 	return NULL; 
 }
 
-int main()
+void connect_ip(char* ip)
 {
 	pthread_t send_thread, recieve_thread;
 	int sockfd, connfd;
@@ -59,27 +46,32 @@ int main()
 
 	// socket create and verification
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
-	if (sockfd == -1) {
+	if (sockfd == -1)
+	{
 		printf("socket creation failed...\n");
 		exit(0);
 	}
 	else
+	{
 		printf("Socket successfully created..\n");
+	}
 	bzero(&servaddr, sizeof(servaddr));
 
 	// assign IP, PORT
 	servaddr.sin_family = AF_INET;
-	servaddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+	servaddr.sin_addr.s_addr = inet_addr(ip);
 	servaddr.sin_port = htons(PORT);
 
 	// connect the client socket to server socket
-	if (connect(sockfd, (SA*)&servaddr, sizeof(servaddr))
-		!= 0) {
-		printf("connection with the server failed...\n");
+	if (connect(sockfd, (SA*)&servaddr, sizeof(servaddr))!= 0)
+	{
+		printf("Connection with the server failed...\n");
 		exit(0);
 	}
 	else
+	{	
 		printf("connected to the server..\n");
+	}
 	pthread_create(&send_thread,NULL,send_m,&sockfd);
 	pthread_create(&recieve_thread,NULL,recieve_m,&sockfd);
 
