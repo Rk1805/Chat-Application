@@ -88,7 +88,7 @@ void *begin_server(void* helper)
 	*(int*)(((struct chat_wind_helper*)helper)->connfd) = accept(sockfd_, (SA *)&cli, &len);
 	if (*(int*)(((struct chat_wind_helper*)helper)->connfd) < 0)
 	{
-		printf("server accept failed...\n");
+		printf("Server accept failed...\n");
 		exit(0);
 	}
 	else
@@ -101,11 +101,15 @@ void *begin_server(void* helper)
 		printf("Connected with the client\n");
 	}
 
-	pthread_create(&send_thread, NULL, send_m_server, (int*)(((struct chat_wind_helper*)helper)->connfd));
-	pthread_create(&recieve_thread, NULL, recieve_m_server, (int*)(((struct chat_wind_helper*)helper)->connfd));
+	// pthread_create(&send_thread, NULL, send_m_server, (int*)(((struct chat_wind_helper*)helper)->connfd));
+	// pthread_create(&recieve_thread, NULL, recieve_m_server, (int*)(((struct chat_wind_helper*)helper)->connfd));
 
-	pthread_join(send_thread, NULL);
-	pthread_join(recieve_thread, NULL);
+	// pthread_join(send_thread, NULL);
+	// pthread_join(recieve_thread, NULL);
+	struct packer* pack_ = (struct packer*)malloc(sizeof(struct packer));
+	pack_->data = NULL;
+	pack_->sockf = &sockfd_;
+	recieve_m_server(pack_);
 
 	// After chatting close the socket
 	close(sockfd_);

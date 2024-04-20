@@ -12,10 +12,7 @@ void quit__area(GtkWidget* widget,gpointer* data);
 void show_con_list(GtkWidget* widget,gpointer* data);
 
 int is_server = 1;
-void* gtk__init__()
-{
-    gtk_main();
-}
+pthread_t server_thread;
 int main(int argc, char *argv[])
 {
     // Initialize GTK
@@ -55,24 +52,7 @@ int main(int argc, char *argv[])
     // Show all widgets
     gtk_widget_show_all(window);
 
-
-    int* connfd;
-    char* client_ip;
-    struct chat_wind_helper* helper = (struct chat_wind_helper*)malloc(sizeof(struct chat_wind_helper));
-    helper->cl_ip = client_ip;
-    helper->connfd = connfd;
-    // Creating multiple threads in order to run the server loop and the Gtk_Main Loop simultaneously.
-
-    pthread_t server_thread, gtk_thread;
-    pthread_create(&gtk_thread,NULL,gtk__init__,NULL);
-    pthread_create(&server_thread,NULL,begin_server,(void*)helper);
-
-    pthread_join(server_thread,NULL);
-	pthread_join(gtk_thread,NULL);
-    if(connfd != 0)
-    {
-        on_chat_clicked(button_chat,window,helper->cl_ip);
-    }
+    gtk_main();
     return 0;
 }
 
@@ -122,9 +102,12 @@ void on_chat_clicked(GtkWidget *widget, gpointer data,char* ip)
     gtk_box_pack_start(GTK_BOX(chat_box),con_list_button,FALSE,FALSE,1);
 
     // Created the connect button
+
     GtkWidget* conn_button = gtk_button_new_with_label("Connect to User");
     g_signal_connect(conn_button,"clicked",G_CALLBACK(connect_to_ip),dabba);
     gtk_box_pack_start(GTK_BOX(chat_box), conn_button, FALSE, FALSE, 1);
+    pthread_join(server_thread,NULL);
+
 
     // The status bar is to be shown below the connect button, but needs to be initialised before the connect button so as to update the status of connection on button click for which we need to pass it as data in the Callback function.
     gtk_box_pack_start(GTK_BOX(chat_box),st_label,FALSE,FALSE,1);
@@ -220,6 +203,7 @@ void show_con_list(GtkWidget* widget,gpointer* data)
 
     g_signal_connect(quit_button,"clicked",G_CALLBACK(quit__area),packer);
     gtk_box_pack_start(GTK_BOX(master_over),quit_button,FALSE,FALSE,1);
+
 
     // Adding the data to the text_boxes in ordered manner by reading from the CSV.
     GtkTextIter iter_left;
@@ -345,9 +329,21 @@ void connect_to_ip(GtkWidget* widget,gpointer* data)
         {
             printf("%s\n",(char*)sqlite3_column_text(stmt,1));
             is_server = 0;
-            connect_ip((char*)sqlite3_column_text(stmt,1),data);
+            int con_st = connect_ip((char*)sqlite3_column_text(stmt,1),data);
+            if(con_st == 0)
+            {
+                int* connfd;
+                char* client_ip;
+                struct chat_wind_helper* helper = (struct chat_wind_helper*)malloc(sizeof(struct chat_wind_helper));
+                helper->cl_ip = client_ip;
+                helper->connfd = connfd;
+                // begin_server((void*)helper);
+                pthread_create(&server_thread,NULL,begin_server,(void*)helper);
+            }
         }
     }
+    GtkWidget* st_label = GTK_WIDGET(data[1]);
+    gtk_label_set_label(GTK_LABEL(st_label),"Could not Connected");
 }
 
 

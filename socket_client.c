@@ -44,7 +44,7 @@ void* recieve_m(void* pack)
 }
 
 
-void connect_ip(char* ip,gpointer* data)
+int connect_ip(char* ip,gpointer* data)
 {
 	pthread_t send_thread, recieve_thread;
 	int connfd;
@@ -72,7 +72,8 @@ void connect_ip(char* ip,gpointer* data)
 	if (connect(sockfd, (SA*)&servaddr, sizeof(servaddr))!= 0)
 	{
 		printf("Connection with the server failed...\n");
-		exit(0);
+		// exit(0);
+		return 0;
 	}
 	else
 	{

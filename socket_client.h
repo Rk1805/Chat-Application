@@ -17,7 +17,7 @@
 #define SA struct sockaddr
 
 
-void connect_ip(char* ip,gpointer* data);
+int connect_ip(char* ip,gpointer* data);
 void* send_m(void* pack);
 void* recieve_m(void* pack);
 
