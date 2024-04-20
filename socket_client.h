@@ -1,6 +1,6 @@
 #ifndef SOCKET_CLIENT
 
-#define SCKET_CLIENT
+#define SOCKET_CLIENT
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <stdio.h>
@@ -11,19 +11,15 @@
 #include <unistd.h> // read(), write(), close()
 #include<pthread.h>
 #include<gtk/gtk.h>
-
+#include "socket_server.h"
 #define MAXLEN 100
 #define PORT 8080
 #define SA struct sockaddr
 
-struct packer
-{
-	void* sockf;
-	gpointer* data;
-};
+
 void connect_ip(char* ip,gpointer* data);
-void* send_m(struct packer* pack);
-void* recieve_m(struct packer* pack);
+void* send_m(void* pack);
+void* recieve_m(void* pack);
 
 
 #endif

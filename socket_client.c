@@ -1,7 +1,7 @@
 #include "socket_client.h"
 
-int sockfd;
-void* send_m(struct packer* pack)
+int sockfd =-1;
+void* send_m(void* pack)
 {
 	// int sockfd=*((int*)(pack->sockf));
 	char buff[MAXLEN];
@@ -23,18 +23,18 @@ void* send_m(struct packer* pack)
 	return NULL;
 }
 
-void* recieve_m(struct packer* pack)
+void* recieve_m(void* pack)
 {
-	int sockfd=*((int*)(pack->sockf));
+	int sockfd_ = *((int*)(((struct packer*)pack)->sockf));
 	char buff[MAXLEN];
 	int n;
-	GtkWidget* rec_name_panel = GTK_WIDGET((pack->data)[0]);
+	GtkWidget* rec_name_panel = GTK_WIDGET((((struct packer*)pack)->data)[0]);
     const gchar* rec_name = gtk_entry_get_text((GtkEntry*)rec_name_panel);
 	for (;;) {
 		bzero(buff, sizeof(buff));
-		read(sockfd, buff, sizeof(buff));
-		GtkWidget *message_inp = GTK_WIDGET((pack->data)[2]);
-    	GtkWidget *text_box = GTK_WIDGET((pack->data)[3]);
+		read(sockfd_, buff, sizeof(buff));
+		GtkWidget *message_inp = GTK_WIDGET((((struct packer*)pack)->data)[2]);
+    	GtkWidget *text_box = GTK_WIDGET((((struct packer*)pack)->data)[3]);
 		GtkTextIter iter;
     	GtkTextBuffer* buffer;
     	buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text_box));
@@ -66,14 +66,14 @@ void connect_ip(char* ip,gpointer* data)
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (sockfd == -1)
 	{
-		printf("socket creation failed...\n");
+		printf("Socket creation failed...\n");
 		exit(0);
 	}
 	else
 	{
 		printf("Socket successfully created..\n");
 	}
-	bzero(&servaddr, sizeof(servaddr));
+	// bzero(&servaddr, sizeof(servaddr));
 
 	// assign IP, PORT
 	servaddr.sin_family = AF_INET;
@@ -88,20 +88,20 @@ void connect_ip(char* ip,gpointer* data)
 	}
 	else
 	{
-		GtkWidget* label = GTK_WIDGET(data[1]);
-		gtk_label_set_label(GTK_LABEL(label),"Connected");
+		// GtkWidget* label = GTK_WIDGET(data[1]);
+		// gtk_label_set_label(GTK_LABEL(label),"Connected");
 		printf("Connected to the server..\n");
 	}
-	struct packer* pack1;
-	pack1->sockf = &sockfd;
-	pack1->data = data;
+	// struct packer* pack1;
+	// pack1->sockf = &sockfd;
+	// pack1->data = data;
 
-	pthread_create(&send_thread,NULL,send_m,pack1);
-	pthread_create(&recieve_thread,NULL,recieve_m,pack1);
+	// pthread_create(&send_thread,NULL,send_m,pack1);
+	// pthread_create(&recieve_thread,NULL,recieve_m,pack1);
 
 	
-	pthread_join(send_thread,NULL);
-	pthread_join(recieve_thread,NULL);
+	// pthread_join(send_thread,NULL);
+	// pthread_join(recieve_thread,NULL);
 
 	// close the socket
 	close(sockfd);

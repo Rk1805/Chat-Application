@@ -2,15 +2,15 @@
 #include<sqlite3.h>
 #include<gtk/gtk.h>
 #include "socket_client.h"
-#include "socket_server.h"
 // Function declarations
-void on_chat_clicked(GtkWidget *widget, gpointer data);
+void on_chat_clicked(GtkWidget *widget, gpointer data,char* ip);
 void on_done_clicked(GtkWidget *widget, gpointer* data);
 void connect_to_ip(GtkWidget* widget, gpointer* data);
 void create_add_user_window(GtkWidget *widget, gpointer data);
 void user_added(GtkWidget* widget,gpointer* data);
 void quit__area(GtkWidget* widget,gpointer* data);
 void show_con_list(GtkWidget* widget,gpointer* data);
+void destroy(pthread_t* threads);
 void* gtk__init__()
 {
     gtk_main();
@@ -39,11 +39,12 @@ int main(int argc, char *argv[])
 
     GtkWidget *button_chat = gtk_button_new_with_label("Chat");
     gtk_widget_set_size_request(button_chat, -1, 50); // Set size request for button
-    g_signal_connect(button_chat, "clicked", G_CALLBACK(on_chat_clicked), window);
+    g_signal_connect(button_chat, "clicked", G_CALLBACK(on_chat_clicked),window);
+
 
     GtkWidget *button_quit = gtk_button_new_with_label("Quit");
     gtk_widget_set_size_request(button_quit, -1, 50); // Set size request for button
-    g_signal_connect(button_quit, "clicked", G_CALLBACK(gtk_main_quit), NULL);
+    g_signal_connect(button_quit, "clicked", G_CALLBACK(gtk_main_quit),NULL);
 
 
     // Packing all the buttons in the vertical box
@@ -54,28 +55,33 @@ int main(int argc, char *argv[])
     gtk_widget_show_all(window);
 
 
-    // Creating multiple threads in order to run the server loop and the Gtk_Main Loop simultaneously.
-    pthread_t server_thread, gtk_thread;
     int* connfd;
+    char* client_ip;
+    struct chat_wind_helper* helper = (struct chat_wind_helper*)malloc(sizeof(struct chat_wind_helper));
+    helper->cl_ip = client_ip;
+    helper->connfd = connfd;
+    // Creating multiple threads in order to run the server loop and the Gtk_Main Loop simultaneously.
+
+    pthread_t server_thread, gtk_thread;
     pthread_create(&gtk_thread,NULL,gtk__init__,NULL);
-    pthread_create(&server_thread,NULL,begin_server,connfd);
+    pthread_create(&server_thread,NULL,begin_server,(void*)helper);
 
     pthread_join(server_thread,NULL);
 	pthread_join(gtk_thread,NULL);
     if(connfd != 0)
     {
-        on_chat_clicked(button_chat,window);
+        on_chat_clicked(button_chat,window,helper->cl_ip);
     }
     return 0;
 }
-
 /* *Distinction between the main function and the other UI window methods.*/
 
 
 
 
 // Callback function for Chat button click
-void on_chat_clicked(GtkWidget *widget, gpointer data) {
+void on_chat_clicked(GtkWidget *widget, gpointer data,char* ip)
+{
     GtkWidget *main_window = GTK_WIDGET(data);
     // Create new chat window
     GtkWidget *chat_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -236,7 +242,6 @@ void show_con_list(GtkWidget* widget,gpointer* data)
         rc = sqlite3_open("./Contacts/Contacts.db",&db);
         char* query = "Create Table Contacts(\"CON_NAME TEXT NOT NULL PRIMARY KEY\",\"IP_ADDRESS TEXT NOT NULL\")";
         sqlite3_exec(db,query,NULL,NULL,NULL);
-
     }
     else
     {
@@ -284,14 +289,14 @@ void on_done_clicked(GtkWidget *widget, gpointer* data)
     const gchar* message = gtk_entry_get_text((GtkEntry*)message_inp);
     GtkTextIter iter;
     GtkTextBuffer* buffer;
-    struct packer* dummy_pack;
-    dummy_pack->data = data;
-    dummy_pack->sockf = NULL;
-    send_m_server(dummy_pack);
+    // struct packer* dummy_pack;
+    // dummy_pack->data = data;
+    // dummy_pack->sockf = NULL;
+    // send_m_server(dummy_pack);
     buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text_box));
     gtk_text_buffer_get_end_iter(buffer,&iter);
-    gtk_text_buffer_insert(buffer,&iter,"You: ",-1);
-    gtk_text_buffer_get_end_iter(buffer,&iter);
+    // gtk_text_buffer_insert(buffer,&iter,"You: ",-1);
+    // gtk_text_buffer_get_end_iter(buffer,&iter);
     gtk_text_buffer_insert(buffer,&iter,message,-1);
     gtk_text_buffer_get_end_iter(buffer,&iter);
     gtk_text_buffer_insert(buffer,&iter,"\n",-1);
@@ -332,7 +337,7 @@ void connect_to_ip(GtkWidget* widget,gpointer* data)
         if(strcmp(rec_name,(char*)sqlite3_column_text(stmt,0)) == 0)
         {
             printf("%s\n",(char*)sqlite3_column_text(stmt,1));
-            connect_ip((char*)sqlite3_column_text(stmt,1),data);
+            // connect_ip((char*)sqlite3_column_text(stmt,1),data);
         }
     }
 }
