@@ -15,7 +15,7 @@
 
 int sockfd_;
 #define MAXLEN 100
-#define PORT 8080
+#define PORT 8090
 #define SA struct sockaddr
 void* send_m_server(void* pack)
 {

@@ -13,7 +13,7 @@
 #include<gtk/gtk.h>
 #include "socket_server.h"
 #define MAXLEN 100
-#define PORT 8080
+#define PORT 8090
 #define SA struct sockaddr
 
 

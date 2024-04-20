@@ -337,7 +337,7 @@ void connect_to_ip(GtkWidget* widget,gpointer* data)
         if(strcmp(rec_name,(char*)sqlite3_column_text(stmt,0)) == 0)
         {
             printf("%s\n",(char*)sqlite3_column_text(stmt,1));
-            // connect_ip((char*)sqlite3_column_text(stmt,1),data);
+            connect_ip((char*)sqlite3_column_text(stmt,1),data);
         }
     }
 }
