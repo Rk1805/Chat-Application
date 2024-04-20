@@ -10,7 +10,8 @@ void create_add_user_window(GtkWidget *widget, gpointer data);
 void user_added(GtkWidget* widget,gpointer* data);
 void quit__area(GtkWidget* widget,gpointer* data);
 void show_con_list(GtkWidget* widget,gpointer* data);
-void destroy(pthread_t* threads);
+
+int is_server = 1;
 void* gtk__init__()
 {
     gtk_main();
@@ -74,10 +75,8 @@ int main(int argc, char *argv[])
     }
     return 0;
 }
+
 /* *Distinction between the main function and the other UI window methods.*/
-
-
-
 
 // Callback function for Chat button click
 void on_chat_clicked(GtkWidget *widget, gpointer data,char* ip)
@@ -121,6 +120,7 @@ void on_chat_clicked(GtkWidget *widget, gpointer data,char* ip)
     GtkWidget* con_list_button = gtk_button_new_with_label("Show Contacts");
     g_signal_connect(con_list_button,"clicked",G_CALLBACK(show_con_list),dabba2);
     gtk_box_pack_start(GTK_BOX(chat_box),con_list_button,FALSE,FALSE,1);
+
     // Created the connect button
     GtkWidget* conn_button = gtk_button_new_with_label("Connect to User");
     g_signal_connect(conn_button,"clicked",G_CALLBACK(connect_to_ip),dabba);
@@ -289,14 +289,21 @@ void on_done_clicked(GtkWidget *widget, gpointer* data)
     const gchar* message = gtk_entry_get_text((GtkEntry*)message_inp);
     GtkTextIter iter;
     GtkTextBuffer* buffer;
-    // struct packer* dummy_pack;
-    // dummy_pack->data = data;
-    // dummy_pack->sockf = NULL;
-    // send_m_server(dummy_pack);
+    struct packer* dummy_pack = (struct packer*)malloc(sizeof(struct packer));
+    dummy_pack->data = data;
+    dummy_pack->sockf = NULL;
+    if(is_server)
+    {
+        send_m_server(dummy_pack);
+    }
+    else
+    {
+        send_m(dummy_pack);
+    }
     buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text_box));
     gtk_text_buffer_get_end_iter(buffer,&iter);
-    // gtk_text_buffer_insert(buffer,&iter,"You: ",-1);
-    // gtk_text_buffer_get_end_iter(buffer,&iter);
+    gtk_text_buffer_insert(buffer,&iter,"You: ",-1);
+    gtk_text_buffer_get_end_iter(buffer,&iter);
     gtk_text_buffer_insert(buffer,&iter,message,-1);
     gtk_text_buffer_get_end_iter(buffer,&iter);
     gtk_text_buffer_insert(buffer,&iter,"\n",-1);
@@ -337,6 +344,7 @@ void connect_to_ip(GtkWidget* widget,gpointer* data)
         if(strcmp(rec_name,(char*)sqlite3_column_text(stmt,0)) == 0)
         {
             printf("%s\n",(char*)sqlite3_column_text(stmt,1));
+            is_server = 0;
             connect_ip((char*)sqlite3_column_text(stmt,1),data);
         }
     }

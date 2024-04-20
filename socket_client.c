@@ -1,25 +1,13 @@
 #include "socket_client.h"
 
-int sockfd =-1;
+int sockfd = - 1;
 void* send_m(void* pack)
 {
 	// int sockfd=*((int*)(pack->sockf));
-	char buff[MAXLEN];
-	int n;
-	for (;;)
-	{
-		bzero(buff, sizeof(buff));
-		n = 0;
-		while ((buff[n++] = getchar()) != '\n');
-		write(sockfd, buff, sizeof(buff));
-		if ((strncmp(buff, "exit", 4)) == 0) 
-		{
-			printf("Exit...\n");
-			break;
-		}
-		printf("You : %s", buff);
-		
-	}
+	GtkWidget *message_inp = GTK_WIDGET((((struct packer*)(pack))->data)[0]);
+	const gchar *message = gtk_entry_get_text((GtkEntry *)message_inp);
+	write(sockfd, message, sizeof(message));
+	printf("You: %s", message);
 	return NULL;
 }
 
@@ -92,7 +80,7 @@ void connect_ip(char* ip,gpointer* data)
 		// gtk_label_set_label(GTK_LABEL(label),"Connected");
 		printf("Connected to the server..\n");
 	}
-	struct packer* pack1 = (struct pack*)malloc(sizeof(struct packer));
+	struct packer* pack1 = (struct packer*)malloc(sizeof(struct packer));
 	pack1->sockf = &sockfd;
 	pack1->data = data;
 
