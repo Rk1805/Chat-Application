@@ -10,9 +10,6 @@
 #include <unistd.h> // read(), write(), close()
 #include "socket_server.h"
 
-
-
-
 int sockfd_;
 #define MAXLEN 100
 #define PORT 8090
@@ -63,7 +60,7 @@ void *begin_server(void* helper)
 		printf("Socket successfully created..\n");
 	bzero(&servaddr, sizeof(servaddr));
 
-	// assign IP, PORT
+	// assign IP, PORTm
 	servaddr.sin_family = AF_INET;
 	servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	servaddr.sin_port = htons(PORT);

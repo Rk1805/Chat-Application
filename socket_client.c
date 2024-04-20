@@ -92,16 +92,16 @@ void connect_ip(char* ip,gpointer* data)
 		// gtk_label_set_label(GTK_LABEL(label),"Connected");
 		printf("Connected to the server..\n");
 	}
-	// struct packer* pack1;
-	// pack1->sockf = &sockfd;
-	// pack1->data = data;
+	struct packer* pack1 = (struct pack*)malloc(sizeof(struct packer));
+	pack1->sockf = &sockfd;
+	pack1->data = data;
 
-	// pthread_create(&send_thread,NULL,send_m,pack1);
-	// pthread_create(&recieve_thread,NULL,recieve_m,pack1);
+	pthread_create(&send_thread,NULL,send_m,pack1);
+	pthread_create(&recieve_thread,NULL,recieve_m,pack1);
 
 	
-	// pthread_join(send_thread,NULL);
-	// pthread_join(recieve_thread,NULL);
+	pthread_join(send_thread,NULL);
+	pthread_join(recieve_thread,NULL);
 
 	// close the socket
 	close(sockfd);
