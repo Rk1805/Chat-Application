@@ -57,7 +57,9 @@ void *begin_server(void* helper)
 		exit(0);
 	}
 	else
+	{
 		printf("Socket successfully created..\n");
+	}
 	bzero(&servaddr, sizeof(servaddr));
 
 	// assign IP, PORTm
@@ -81,10 +83,12 @@ void *begin_server(void* helper)
 		exit(0);
 	}
 	else
-		printf("Server listening..\n");
+	{
+		printf("Server listening..\n"); 
+	}
 	socklen_t len;
 	len = sizeof(cli);
-
+	printf("Yahan tak aa gya");
 	// Accept the data packet from client and verification
 	*(int*)(((struct chat_wind_helper*)helper)->connfd) = accept(sockfd_, (SA *)&cli, &len);
 	if (*(int*)(((struct chat_wind_helper*)helper)->connfd) < 0)
@@ -96,6 +100,7 @@ void *begin_server(void* helper)
 	{
 		// Retrieve client's IP address
 		char client_ip[25];
+		printf("Reached Here");
 		struct sockaddr_in *client_addr = (struct sockaddr_in *)&cli;
 		inet_ntop(AF_INET, &(client_addr->sin_addr), client_ip, INET_ADDRSTRLEN);
 		((struct chat_wind_helper*)helper)->cl_ip = client_ip;

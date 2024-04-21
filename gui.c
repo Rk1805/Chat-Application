@@ -12,6 +12,7 @@ void quit__area(GtkWidget* widget,gpointer* data);
 void show_con_list(GtkWidget* widget,gpointer* data);
 
 int is_server = 1;
+int connected = 0;
 pthread_t* server_thread = NULL;
 int main(int argc, char *argv[])
 {
@@ -347,10 +348,15 @@ void connect_to_ip(GtkWidget* widget,gpointer* data)
                 server_thread = (pthread_t*)malloc(sizeof(pthread_t));
                 pthread_create(server_thread,NULL,begin_server,(void*)helper);
             }
+            else
+            {
+                connected = 1;
+                return;
+            }
         }
     }
-    GtkWidget* st_label = GTK_WIDGET(data[1]);
-    gtk_label_set_label(GTK_LABEL(st_label),"Could not Connect");
+    // GtkWidget* st_label = GTK_WIDGET(data[1]);
+    // gtk_label_set_label(GTK_LABEL(st_label),"Could not Connect");
 }
 
 

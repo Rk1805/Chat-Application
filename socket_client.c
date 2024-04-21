@@ -13,7 +13,7 @@ void* send_m(void* pack)
 
 void* recieve_m(void* pack)
 {
-	int sockfd_ = *((int*)(((struct packer*)pack)->sockf));
+	// int sockfd_ = *((int*)(((struct packer*)pack)->sockf));
 	char buff[MAXLEN];
 	int n;
 	GtkWidget* rec_name_panel = GTK_WIDGET((((struct packer*)pack)->data)[0]);
@@ -21,7 +21,7 @@ void* recieve_m(void* pack)
 	for (;;)
 	{
 		bzero(buff, sizeof(buff));
-		read(sockfd_, buff, sizeof(buff));
+		read(sockfd, buff, sizeof(buff));
 		GtkWidget *message_inp = GTK_WIDGET((((struct packer*)pack)->data)[2]);
     	GtkWidget *text_box = GTK_WIDGET((((struct packer*)pack)->data)[3]);
 		GtkTextIter iter;
@@ -61,7 +61,7 @@ int connect_ip(char* ip,gpointer* data)
 	else
 	{
 		printf("Socket successfully created..\n");
-		printf("After socket creation");
+		// printf("After socket creation");
 	}
 	bzero(&servaddr, sizeof(servaddr));
 
@@ -80,7 +80,7 @@ int connect_ip(char* ip,gpointer* data)
 		// GtkWidget* label = GTK_WIDGET(data[1]);
 		// gtk_label_set_label(GTK_LABEL(label),"Connected");
 		printf("Connected to the server..\n");
-		// return 1;
+		return 1;
 	}
 	struct packer* pack1 = (struct packer*)malloc(sizeof(struct packer));
 	pack1->sockf = &sockfd;
@@ -92,7 +92,7 @@ int connect_ip(char* ip,gpointer* data)
 	
 	// pthread_join(send_thread,NULL);
 	// pthread_join(recieve_thread,NULL);
-	recieve_m(pack1);
+	// recieve_m(pack1);
 
 	// close the socket
 	close(sockfd);
