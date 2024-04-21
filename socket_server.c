@@ -9,7 +9,7 @@
 #include <arpa/inet.h>
 #include <unistd.h> // read(), write(), close()
 #include "socket_server.h"
-int sockfd_;
+int sockfd_ = -1;
 #define MAXLEN 100
 #define PORT 8090
 #define SA struct sockaddr
@@ -17,21 +17,26 @@ void* send_m_server(void* pack)
 {
 	GtkWidget *message_inp = GTK_WIDGET((((struct packer*)(pack))->data)[0]);
 	const gchar *message = gtk_entry_get_text((GtkEntry *)message_inp);
-	write(sockfd_, message, sizeof(message));
-	printf("You: %s", message);
+	send(sockfd_, message, sizeof(message),0);
+	// printf("You: %s", message);
+	printf("%d\n",sockfd_);
 	return NULL;
 }
 
 void* recieve_m_server(void* pack)
 {
+	printf("Inside Recive\n");
 	int sockfd_ = *(int *)(((struct packer*)pack)->sockf);
 	char buff[MAXLEN];
 	int n;
 	for (;;)
 	{
 		bzero(buff, sizeof(buff));
-		read(sockfd_, buff, sizeof(buff));
-		printf("Client : %s", buff);
+		recv(sockfd_, buff, sizeof(buff),0);
+		if(buff!=NULL)
+		{
+			printf("%s", buff);
+		}
 		if ((strncmp(buff, "exit", 4)) == 0)
 		{
 			printf("Exit...\n");
@@ -88,7 +93,6 @@ void *begin_server(void* helper)
 	}
 	socklen_t len;
 	len = sizeof(cli);
-	printf("Yahan tak aa gya");
 	// Accept the data packet from client and verification
 	*(int*)(((struct chat_wind_helper*)helper)->connfd) = accept(sockfd_, (SA *)&cli, &len);
 	if (*(int*)(((struct chat_wind_helper*)helper)->connfd) < 0)
@@ -100,7 +104,7 @@ void *begin_server(void* helper)
 	{
 		// Retrieve client's IP address
 		char client_ip[25];
-		printf("Reached Here");
+		// printf("Reached Here");
 		struct sockaddr_in *client_addr = (struct sockaddr_in *)&cli;
 		inet_ntop(AF_INET, &(client_addr->sin_addr), client_ip, INET_ADDRSTRLEN);
 		((struct chat_wind_helper*)helper)->cl_ip = client_ip;
@@ -117,7 +121,9 @@ void *begin_server(void* helper)
 	struct packer* pack_ = (struct packer*)malloc(sizeof(struct packer));
 	pack_->data = NULL;
 	pack_->sockf = &sockfd_;
+	printf("%d\n",sockfd_);
 	recieve_m_server(pack_);
+	
 
 	// After chatting close the socket
 	close(sockfd_);

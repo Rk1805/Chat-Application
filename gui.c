@@ -14,6 +14,7 @@ void show_con_list(GtkWidget* widget,gpointer* data);
 int is_server = 1;
 int connected = 0;
 pthread_t* server_thread = NULL;
+pthread_t* recieve_thread = NULL;
 int main(int argc, char *argv[])
 {
     // Initialize GTK
@@ -110,6 +111,10 @@ void on_chat_clicked(GtkWidget *widget, gpointer data,char* ip)
     if(server_thread)
     {
         pthread_join(*server_thread,NULL);
+    }
+    if(recieve_thread)
+    {
+        pthread_join(*recieve_thread,NULL);
     }
 
     // The status bar is to be shown below the connect button, but needs to be initialised before the connect button so as to update the status of connection on button click for which we need to pass it as data in the Callback function.
@@ -279,14 +284,7 @@ void on_done_clicked(GtkWidget *widget, gpointer* data)
     struct packer* dummy_pack = (struct packer*)malloc(sizeof(struct packer));
     dummy_pack->data = data;
     dummy_pack->sockf = NULL;
-    if(is_server)
-    {
-        send_m_server(dummy_pack);
-    }
-    else
-    {
-        send_m(dummy_pack);
-    }
+    send_m_server(dummy_pack);
     buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text_box));
     gtk_text_buffer_get_end_iter(buffer,&iter);
     gtk_text_buffer_insert(buffer,&iter,"You: ",-1);
@@ -340,8 +338,8 @@ void connect_to_ip(GtkWidget* widget,gpointer* data)
                 struct chat_wind_helper* helper = (struct chat_wind_helper*)malloc(sizeof(struct chat_wind_helper));
                 helper->cl_ip = (char*)malloc(sizeof(char)*20);
                 helper->connfd = (int*)malloc(sizeof(int));
-                strcpy(helper->cl_ip,client_ip);
-                helper->connfd = connfd;
+                // strcpy(helper->cl_ip,client_ip);
+                // helper->connfd = connfd;
                 // helper->data = data = (gpointer*)malloc(sizeof(gpointer));
                 // helper->data = data;
                 // begin_server((void*)helper);
@@ -350,8 +348,11 @@ void connect_to_ip(GtkWidget* widget,gpointer* data)
             }
             else
             {
-                connected = 1;
-                return;
+                recieve_thread = (pthread_t*)malloc(sizeof(pthread_t));
+                struct packer* packing = (struct packer*)malloc(sizeof(struct packer));
+                packing->sockf = 0;
+                packing->data = data;
+                pthread_create(recieve_thread,NULL,recieve_m,packing);
             }
         }
     }
