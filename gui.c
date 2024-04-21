@@ -12,7 +12,7 @@ void quit__area(GtkWidget* widget,gpointer* data);
 void show_con_list(GtkWidget* widget,gpointer* data);
 
 int is_server = 1;
-pthread_t server_thread;
+pthread_t* server_thread = NULL;
 int main(int argc, char *argv[])
 {
     // Initialize GTK
@@ -106,8 +106,10 @@ void on_chat_clicked(GtkWidget *widget, gpointer data,char* ip)
     GtkWidget* conn_button = gtk_button_new_with_label("Connect to User");
     g_signal_connect(conn_button,"clicked",G_CALLBACK(connect_to_ip),dabba);
     gtk_box_pack_start(GTK_BOX(chat_box), conn_button, FALSE, FALSE, 1);
-    pthread_join(server_thread,NULL);
-
+    if(server_thread)
+    {
+        pthread_join(*server_thread,NULL);
+    }
 
     // The status bar is to be shown below the connect button, but needs to be initialised before the connect button so as to update the status of connection on button click for which we need to pass it as data in the Callback function.
     gtk_box_pack_start(GTK_BOX(chat_box),st_label,FALSE,FALSE,1);
@@ -337,14 +339,16 @@ void connect_to_ip(GtkWidget* widget,gpointer* data)
                 struct chat_wind_helper* helper = (struct chat_wind_helper*)malloc(sizeof(struct chat_wind_helper));
                 helper->cl_ip = client_ip;
                 helper->connfd = connfd;
-                helper->data = data;
+                // helper->data = data = (gpointer*)malloc(sizeof(gpointer));
+                // helper->data = data;
                 // begin_server((void*)helper);
-                pthread_create(&server_thread,NULL,begin_server,(void*)helper);
+                server_thread = (pthread_t*)malloc(sizeof(pthread_t));
+                pthread_create(server_thread,NULL,begin_server,(void*)helper);
             }
         }
     }
     GtkWidget* st_label = GTK_WIDGET(data[1]);
-    gtk_label_set_label(GTK_LABEL(st_label),"Could not Connected");
+    gtk_label_set_label(GTK_LABEL(st_label),"Could not Connect");
 }
 
 

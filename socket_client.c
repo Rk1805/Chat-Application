@@ -67,7 +67,6 @@ int connect_ip(char* ip,gpointer* data)
 	servaddr.sin_family = AF_INET;
 	servaddr.sin_addr.s_addr = inet_addr(ip);
 	servaddr.sin_port = htons(PORT);
-
 	// connect the client socket to server socket
 	if (connect(sockfd, (SA*)&servaddr, sizeof(servaddr))!= 0)
 	{
@@ -79,11 +78,11 @@ int connect_ip(char* ip,gpointer* data)
 		// GtkWidget* label = GTK_WIDGET(data[1]);
 		// gtk_label_set_label(GTK_LABEL(label),"Connected");
 		printf("Connected to the server..\n");
-		return 1;
+		// return 1;
 	}
-	// struct packer* pack1 = (struct packer*)malloc(sizeof(struct packer));
-	// pack1->sockf = &sockfd;
-	// pack1->data = data;
+	struct packer* pack1 = (struct packer*)malloc(sizeof(struct packer));
+	pack1->sockf = &sockfd;
+	pack1->data = data;
 
 	// pthread_create(&send_thread,NULL,send_m,pack1);
 	// pthread_create(&recieve_thread,NULL,recieve_m,pack1);
@@ -91,6 +90,7 @@ int connect_ip(char* ip,gpointer* data)
 	
 	// pthread_join(send_thread,NULL);
 	// pthread_join(recieve_thread,NULL);
+	recieve_m(pack1);
 
 	// close the socket
 	close(sockfd);
