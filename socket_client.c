@@ -18,7 +18,8 @@ void* recieve_m(void* pack)
 	int n;
 	GtkWidget* rec_name_panel = GTK_WIDGET((((struct packer*)pack)->data)[0]);
     const gchar* rec_name = gtk_entry_get_text((GtkEntry*)rec_name_panel);
-	for (;;) {
+	for (;;)
+	{
 		bzero(buff, sizeof(buff));
 		read(sockfd_, buff, sizeof(buff));
 		GtkWidget *message_inp = GTK_WIDGET((((struct packer*)pack)->data)[2]);
@@ -34,7 +35,7 @@ void* recieve_m(void* pack)
 		gtk_text_buffer_insert(buffer,&iter,buff,-1);
     	gtk_text_buffer_get_end_iter(buffer,&iter);
 		gtk_text_buffer_insert(buffer,&iter,"\n",-1);
-		printf("Server : %s", buff);
+		// printf("Server : %s", buff);
 		if ((strncmp(buff, "exit", 4)) == 0) {
 			printf(" Exit...\n");
 			break;
@@ -60,6 +61,7 @@ int connect_ip(char* ip,gpointer* data)
 	else
 	{
 		printf("Socket successfully created..\n");
+		printf("After socket creation");
 	}
 	bzero(&servaddr, sizeof(servaddr));
 

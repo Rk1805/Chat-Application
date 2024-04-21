@@ -337,7 +337,9 @@ void connect_to_ip(GtkWidget* widget,gpointer* data)
                 int* connfd;
                 char* client_ip;
                 struct chat_wind_helper* helper = (struct chat_wind_helper*)malloc(sizeof(struct chat_wind_helper));
-                helper->cl_ip = client_ip;
+                helper->cl_ip = (char*)malloc(sizeof(char)*20);
+                helper->connfd = (int*)malloc(sizeof(int));
+                strcpy(helper->cl_ip,client_ip);
                 helper->connfd = connfd;
                 // helper->data = data = (gpointer*)malloc(sizeof(gpointer));
                 // helper->data = data;
