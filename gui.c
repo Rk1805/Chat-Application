@@ -11,7 +11,7 @@ void user_added(GtkWidget* widget,gpointer* data);
 void quit__area(GtkWidget* widget,gpointer* data);
 void show_con_list(GtkWidget* widget,gpointer* data);
 
-int is_server = 1;
+int is_server = 0;
 int connected = 0;
 pthread_t* server_thread = NULL;
 pthread_t* recieve_thread = NULL;
@@ -108,14 +108,6 @@ void on_chat_clicked(GtkWidget *widget, gpointer data,char* ip)
     GtkWidget* conn_button = gtk_button_new_with_label("Connect to User");
     g_signal_connect(conn_button,"clicked",G_CALLBACK(connect_to_ip),dabba);
     gtk_box_pack_start(GTK_BOX(chat_box), conn_button, FALSE, FALSE, 1);
-    if(server_thread)
-    {
-        pthread_join(*server_thread,NULL);
-    }
-    if(recieve_thread)
-    {
-        pthread_join(*recieve_thread,NULL);
-    }
 
     // The status bar is to be shown below the connect button, but needs to be initialised before the connect button so as to update the status of connection on button click for which we need to pass it as data in the Callback function.
     gtk_box_pack_start(GTK_BOX(chat_box),st_label,FALSE,FALSE,1);
@@ -154,6 +146,14 @@ void on_chat_clicked(GtkWidget *widget, gpointer data,char* ip)
     // Show all widgets
     gtk_widget_show_all(chat_window);
     gtk_widget_hide(main_window);
+    if(server_thread)
+    {
+        pthread_join(*server_thread,NULL);
+    }
+    if(recieve_thread)
+    {
+        pthread_join(*recieve_thread,NULL);
+    }
 }
 
 
@@ -284,7 +284,16 @@ void on_done_clicked(GtkWidget *widget, gpointer* data)
     struct packer* dummy_pack = (struct packer*)malloc(sizeof(struct packer));
     dummy_pack->data = data;
     dummy_pack->sockf = NULL;
-    send_m_server(dummy_pack);
+    if(is_server != 0)
+    {
+        printf("Before send_server\n");
+        send_m_server(dummy_pack);
+    }
+    else
+    {   
+        printf("before client server");
+        send_m(dummy_pack);
+    }
     buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text_box));
     gtk_text_buffer_get_end_iter(buffer,&iter);
     gtk_text_buffer_insert(buffer,&iter,"You: ",-1);
@@ -344,6 +353,7 @@ void connect_to_ip(GtkWidget* widget,gpointer* data)
                 // helper->data = data;
                 // begin_server((void*)helper);
                 server_thread = (pthread_t*)malloc(sizeof(pthread_t));
+                is_server = 1;
                 pthread_create(server_thread,NULL,begin_server,(void*)helper);
             }
             else
