@@ -37,6 +37,7 @@ void* recieve_m_server(void* pack)
 			printf("Exit...\n");
 			break;
 		}
+
 	}
 	return NULL;
 }
@@ -98,6 +99,8 @@ void *begin_server(void* helper)
 		struct sockaddr_in *client_addr = (struct sockaddr_in *)&cli;
 		inet_ntop(AF_INET, &(client_addr->sin_addr), client_ip, INET_ADDRSTRLEN);
 		((struct chat_wind_helper*)helper)->cl_ip = client_ip;
+		GtkWidget* st_label = GTK_WIDGET(((struct chat_wind_helper*)helper)->data[1]);
+		gtk_label_set_label(GTK_LABEL(st_label),"Connected");
 		printf("Connected with the client\n");
 	}
 

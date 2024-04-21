@@ -72,7 +72,6 @@ int connect_ip(char* ip,gpointer* data)
 	if (connect(sockfd, (SA*)&servaddr, sizeof(servaddr))!= 0)
 	{
 		printf("Connection with the server failed...\n");
-		// exit(0);
 		return 0;
 	}
 	else
@@ -80,17 +79,18 @@ int connect_ip(char* ip,gpointer* data)
 		// GtkWidget* label = GTK_WIDGET(data[1]);
 		// gtk_label_set_label(GTK_LABEL(label),"Connected");
 		printf("Connected to the server..\n");
+		return 1;
 	}
-	struct packer* pack1 = (struct packer*)malloc(sizeof(struct packer));
-	pack1->sockf = &sockfd;
-	pack1->data = data;
+	// struct packer* pack1 = (struct packer*)malloc(sizeof(struct packer));
+	// pack1->sockf = &sockfd;
+	// pack1->data = data;
 
-	pthread_create(&send_thread,NULL,send_m,pack1);
-	pthread_create(&recieve_thread,NULL,recieve_m,pack1);
+	// pthread_create(&send_thread,NULL,send_m,pack1);
+	// pthread_create(&recieve_thread,NULL,recieve_m,pack1);
 
 	
-	pthread_join(send_thread,NULL);
-	pthread_join(recieve_thread,NULL);
+	// pthread_join(send_thread,NULL);
+	// pthread_join(recieve_thread,NULL);
 
 	// close the socket
 	close(sockfd);

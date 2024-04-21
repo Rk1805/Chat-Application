@@ -24,7 +24,7 @@ struct chat_wind_helper
 {
 	char* cl_ip;
 	int* connfd;
-	// gpointer* data;
+	gpointer* data;
 };
 void* send_m_server(void* pack);
 void* recieve_m_server(void* pack);
